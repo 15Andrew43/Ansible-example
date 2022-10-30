@@ -1,0 +1,51 @@
+---
+# tasks file for site
+- debug:
+    msg: "Deploy {{ env }}-{{ service_name }}. My os_famili is {{ ansible_os_family }}, {{ inventory_hostname }}"
+
+- block:
+  - name: Install Apache for RedHat
+    yum: 
+      name: httpd
+      state: installed
+  - name: Start Wev Server for RedHat
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+  when: ansible_os_family == 'RedHat'
+
+- block:
+  - name: Install Apache for Debian
+    apt: 
+      name: apache2
+      state: present
+  - name: Start Wev Server for Debian
+    service:
+      name: apache2
+      state: started
+      enabled: yes
+  when: ansible_os_family == 'Debian'
+
+
+- name: Generate index.html
+  template:
+    src: index.j2
+    dest: /var/www/html/index.html
+    mode: 0555
+  notify: 
+     - Restart Apache for RedHat
+     - Restart Apache for Debian
+
+- name: Copy files for site
+  copy:
+    src: "{{ item }}"
+    dest: /var/www/html/
+    mode: 0555
+  with_items:
+    - "1.jpeg"
+    - "2.jpeg"
+
+  notify: 
+     - Restart Apache for RedHat
+     - Restart Apache for Debian

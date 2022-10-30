@@ -1,0 +1,8 @@
+---
+
+- name: Setup backend role
+  hosts: backend
+  become: yes
+
+  roles:
+    - backend

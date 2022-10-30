@@ -1,0 +1,4 @@
+---
+# tasks file for web_db
+- debug:
+    msg: "Deploy {{ env }}-{{ service_name }}"

@@ -1,0 +1,6 @@
+---
+# defaults file for backend
+backend:
+  name: 'backend-for-web-db'
+
+service_name: "{{ backend.name }}"

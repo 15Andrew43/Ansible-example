@@ -1,0 +1,6 @@
+---
+# defaults file for site
+site:
+  name: 'example-site'
+
+service_name: "{{ site.name }}"
