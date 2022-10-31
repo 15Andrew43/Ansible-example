@@ -5,5 +5,6 @@
   become: yes
 
   roles:
+    - docker
     - web_db
     - backend
