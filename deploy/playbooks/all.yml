@@ -1,6 +1,6 @@
 ---
 
-- name: Setup backend role
+- name: Setup role
   hosts: all
   become: yes
 
