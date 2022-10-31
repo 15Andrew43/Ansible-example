@@ -1,0 +1,8 @@
+---
+# defaults file for backend
+backend:
+  name: 'backend-for-web-db'
+  target: '51.250.99.135'
+
+service_name: "{{ backend.name }}"
+service_target: "{{ backend.target }}"

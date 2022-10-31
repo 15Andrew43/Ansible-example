@@ -1,0 +1,8 @@
+---
+
+- name: Setup site role
+  hosts: site
+  become: yes
+
+  roles:
+    - site

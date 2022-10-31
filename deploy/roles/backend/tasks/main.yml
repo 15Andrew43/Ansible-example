@@ -1,0 +1,9 @@
+---
+# tasks file for backend
+- debug:
+    msg: "Deploy {{ env }}-{{ service_name }}"
+
+- name: Create user every minute
+  ansible.builtin.cron:
+    name: "create user"
+    job: "curl -X 'POST' 'http://{{ service_target }}:8099/users' -H 'accept: */*' -H 'Content-Type: application/json' -d '{ \"nickname\": \"newNickName\", \"email\": \"email$gmail.com\", \"rating\": 100500 }'"
