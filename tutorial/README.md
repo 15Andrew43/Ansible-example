@@ -9,7 +9,7 @@
  - ansible --version
 
 
-## example-1
+## Example-1
 
 ### hosts.txt (inventory):
 ```
@@ -108,9 +108,9 @@ inventory           = ./hosts.txt
 
 
 
-## example-2
 
 
+## Example-2
 
 ### ansible.cfg
 ```
@@ -151,6 +151,79 @@ Privet
 создать/удалить файлы и директории
  - ansible all -m get_url -a "url=https://aaaaaa.com/bbb dest=/home" -b  
 скачать из интернета
+ - ansible all -m yum -a "name=state=stress state=installed" -b
+установить/удалить stress на сервера
+ - ansible all -m uri -a "url=http://www.advt.it.net return_content=yes"
+прочитать страничку из интернета
+ - ansible all -m yum -a "name=httpd state=latest" -b
+ - ansible all -m yum -a "name=httpd state=removed" -b
+установить апаче
+ - ansible all -m service -a "name=httpd state=started enables=yes" -b
+запустить сервис и чтобы при перезагрузке запускался
+ - ansible all m copy -a "arc=privet.txt dest=/home mode=777" -b -vvvv
+для дебагинга можно написать -v
+ - ansible-doc -l
+посмотреть все модули
 
 
 
+
+## Example-3
+
+
+### directories structure
+```
+.
+├── ansible.cfg
+├── group_vars
+│   ├── ALL_SERVERS_DB
+│   ├── PROD_SERVERS_WEB
+│   └── STAGING_SERVERS_WEB
+└── hosts.txt
+```
+
+
+### hosts.txt
+```
+[STAGING_SERVERS_WEB]
+linuxX1 ansible_host=172.31.8.69
+linuxX1 ansible_host=172.31.8.69 password=mysecret
+
+
+[PROD_SERVERS_WEB]
+linuxX1 ansible_host=172.31.8.16
+linuxX1 ansible_host=172.31.8.168
+
+
+
+[STAGING_SERVERS_DB]
+192.168.2.1
+192.168.2.2
+
+[PROD_SERVERS_DB]
+192.168.2.1
+192.168.2.2
+
+[ALL_SERVERS_DB:children]
+STAGING_SERVERS_DB
+PROD_SERVERS_DB
+```
+### STAGING_SERVERS_WEB
+```
+---
+ansible_user                 : ec2-user
+ansible_ssh_private_key_file : <path to file>
+```
+### PROD_SERVERS_WEB
+```
+---
+ansible_user                 : ec2-user
+ansible_ssh_private_key_file : <path to file>
+```
+### ALL_SERVERS_DB
+```
+---
+db_endpoint : xxxxxx.yyyyyyy.com:4151
+owner       : vasya
+location    : "Huston, TX"
+```
