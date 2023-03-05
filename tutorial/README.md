@@ -145,7 +145,7 @@ ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
 ```
 Privet
 ```
- - ansible all m copy -a "arc=privet.txt dest=/home mode=777" -b  
+ - ansible all m copy -a "src=privet.txt dest=/home mode=777" -b  
 скопировать файл на сервера
  - ansible prod_servers -m file -a "path=/home/privet.txt state=absent" -b  
 создать/удалить файлы и директории
@@ -160,7 +160,7 @@ Privet
 установить апаче
  - ansible all -m service -a "name=httpd state=started enables=yes" -b
 запустить сервис и чтобы при перезагрузке запускался
- - ansible all m copy -a "arc=privet.txt dest=/home mode=777" -b -vvvv
+ - ansible all m copy -a "src=privet.txt dest=/home mode=777" -b -vvvv
 для дебагинга можно написать -v
  - ansible-doc -l
 посмотреть все модули
@@ -171,7 +171,7 @@ Privet
 ## Example-3
 
 
-### directories structure
+### Structure of directories
 ```
 .
 ├── ansible.cfg
@@ -227,3 +227,87 @@ db_endpoint : xxxxxx.yyyyyyy.com:4151
 owner       : vasya
 location    : "Huston, TX"
 ```
+
+
+
+## Example-4 (Playbooks)
+
+### Structure of directories
+```
+.
+├── ansible.cfg
+├── group_vars
+│   └── PROD_SERVERS_WEB
+└── hosts.txt
+├── MyWebSite
+│   └── index.html
+├── playbook1.yml
+├── playbook2.yml
+└── playbook3.yml
+```
+
+### playbook1.yml
+```
+---
+- name: Test Connection to my servers
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Ping me servers
+    ping:
+```
+ - ansible-playbook playbook1.yml
+
+
+
+### playbook2.yml
+```
+---
+- name: Install default Apache Web Server
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Install Apache WebServer
+    yum: name=httpd state=latest
+  - name: Start Apache and enable it on the every boot
+    service: name=httpd state=started enabled=yes
+```
+- ansible-playbook playbook2.yml
+
+
+
+### playbook3.yml
+```
+---
+- name: Install Apache and upload my Web page
+  hosts: all
+  become: yes
+
+  vars:
+    source_file: ./MyWebSite/index.html
+    destin_file: /var/www/html
+
+  tasks:
+  - name: Install Apache WebServer
+    yum: name=httpd state=latest
+
+  - name: copy my HomePage to servers
+    copy: src={{ source_file }} dest = {{ destin_file }} mode=0555
+    notify: Restart Apache
+
+  - name: Start Apache and enable it on the every boot
+    service: name=httpd state=started enabled=yes
+
+
+  handlers:
+  - name: Restart Apache
+    service: name=httpd state=restarted
+```
+- ansible-playbook playbook3.yml
+
+
+
+
+
