@@ -357,4 +357,80 @@ delegate_to перенаправит выполнение на другой се
 Данный пример эмулирует эту ситуацию. На серверах перед выполнением происходит отключение их от балансировки, затем накатываются обновления, затем перегружается сервер, а затем опять включается в балансировку нагрузки.
 
 
+## Example-12 (Errors)
+
+### playbook.yml
+```
+---
+- name: Ansible lesson
+  hosts: all
+#  any_errors_fatal: true
+  become: yes
+
+  tasks:
+  - name: Task number 1
+    yum: name=treeee state=latest  # <----, treee not found
+    ignore_errors: yes
+
+  - name: Task number 2
+    shell: echo Hello World
+    register: results
+#    failed_when: "'World' in results.stdout"
+    failed_when: results.rc != 0  # такое по умолчанию
+
+  - debug:
+      var: results
+
+  - name: Task number 3
+    shell: echo privet mir!!!
+```
+
+
+## Example-12 (Vault)
+
+ - ansible-vault create mysecret.txt
+ - ansible-vault view mysecret.txt
+ - ansible-vault edit mysecret.txt
+ - ansible-vault rekey mysecret.txt
+
+### playbook.yml
+```
+---
+- name: Ansible lesson
+  hosts: all
+  become: yes
+
+  vars:
+    admin_password: PASSW0rd1234@
+
+  tasks:
+  - name: Install package tree
+    yum: name=tree state=latest
+
+  - name: Create Config file
+    copy:
+      dest: "/home/ec2-user/myconfig.conf"
+      content: |
+        port = 9092
+        log = 7days
+        home = /opt/kafka/bin
+        user = admin
+        password = {{ admin_password }}
+```
+
+ - ansible-vault encrypt playbook.yml
+зашифровать плэйбук
+ - ansible-playbook playbook.yml --ask-vault-pass
+ - ansible-playbook playbook.yml --vault-password-file mypass.txt
+запустить зашифрованный плэйбук
+ - ansible-vault view playbook.yml
+ - ansible-vault decrypt playbook.yml
+ - ansible-vault encrypt_string
+ - echo -n "EGHJKECW" | ansible-vault encrypt_string
+зашифровать строку  
+Теперь вмето переменной в плэйбуке можно вставить <! vault | AHB123412340032...123847213> и получится зашифрованная переменная.
+
+
+
+
 
