@@ -12,8 +12,8 @@
 ## example-1
 
 # hosts.txt (inventory):
----------------------------------------------------------------------------------
-````
+
+```
 10.50.1.1
 webserver.google.com
 myserver ansible_host=10.20.30.40
@@ -83,8 +83,8 @@ prod_ALL
 
 [different:vars]
 message=Hello
-````
----------------------------------------------------------------------------------
+```
+
 
  - ansible -i hosts.txt all -m ping
 -i hosts.txt    = указать инвентори
@@ -94,13 +94,13 @@ all             = группа хостов (например prod_servers)
 
 
 # ansible.cfg
----------------------------------------------------------------------------------
+
 ```
 [defaults]
 host_key_checking   = false
 inventory           = ./hosts.txt
 ```
----------------------------------------------------------------------------------
+
 
  - ansible all -m ping
  - ansible-inventory --list  = для прсмотра какие переменные в инвентори и описание серверов
@@ -110,19 +110,16 @@ inventory           = ./hosts.txt
 
 ## example-2
 
-# directory structure:
----
-  |--ansible.cfg
-  |--hosts.txt
+
 
 # ansible.cfg
----------------------------------------------------------------------------------
+```
 [defaults]
 host_key_checking   = false
 inventory           = ./hosts.txt
----------------------------------------------------------------------------------
+```
 # hosts.txt (inventory):
----------------------------------------------------------------------------------
+```
 [staging_servers]
 linuxX ansible_host=172.31.8.69 ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
 
@@ -133,7 +130,7 @@ linux2 ansible_host=172.31.27.118
 [prod_servers:vars]
 ansible_user=ec2-user
 ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
----------------------------------------------------------------------------------
+```
 
  - ansible all -m ping
  - ansible staging_servers -m setup 
@@ -145,9 +142,9 @@ ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
 
 
 # hello.txt
----------------------------------------------------------------------------------
+```
 Privet
----------------------------------------------------------------------------------
+```
  - ansible all m copy -a "arc=privet.txt dest=/home mode=777" -b
 = скопировать файл на сервера
  - ansible prod_servers -m file -a "path=/home/privet.txt state=absent" -b
