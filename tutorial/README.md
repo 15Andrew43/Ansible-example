@@ -449,7 +449,7 @@ linux3 ansible_host=172.31.27.65
 
 
 
-## Example-7 (Loop, with_items, until, with_fileglob)
+## Example-7 (Loop, with_items, until, with_fileglob; templates)
 
 ### Structure of directories
 ```
@@ -465,9 +465,34 @@ linux3 ansible_host=172.31.27.65
 │   ├── bulgaria.png
 │   ├── jordan.png
 │   ├── newzeland.png
-│   └── index.html
+│   └── index.j2
 ├── loop.yml
 └── playbook.yml
+```
+
+### hosts.txt
+```
+[PROD_SERVERS_WEB]
+linux1 ansible_host=172.31.27.113       owner=Vasya
+linux3 ansible_host=172.31.27.65        owner=Petya
+```
+
+### index.j2
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    Owner of this server is {{ owner }}.
+    Server hostname : {{ ansible_hostname }}.
+    Server OS Family : {{ ansible_os_family }}.
+    Ip Adress : {{ ansible_default_ipv4.address }}
+</body>
+</html>
 ```
 
 
@@ -543,15 +568,21 @@ linux3 ansible_host=172.31.27.65
         
     when: ansible_os_family != "RedHat"
 
+
+  - name: Generate index.html file
+    template: src={{ source_folder }}/index.j2 dest={{ destin_folder }}/index.html mode=0555
+    notify: 
+        - Restart Apache RedHat
+        - Restart Apache Debian
+
   - name: copy my HomePage to servers
     copy: src={{ source_folder }}/{{ item }} dest = {{ destin_folder }} mode=0555
-    with_fileglob: "{{ source_folder }}/*.*"
-#    loop:
-#        - "bahamas.png"
-#        - "bulgaria.png"
-#        - "jordan.png"
-#        - "newzeland.png"
-#        - "index.html"
+#   with_fileglob: "{{ source_folder }}/*.*"
+    loop:
+        - "bahamas.png"
+        - "bulgaria.png"
+        - "jordan.png"
+        - "newzeland.png"
     notify: 
         - Restart Apache RedHat
         - Restart Apache Debian
@@ -564,16 +595,3 @@ linux3 ansible_host=172.31.27.65
     service: name=apache2 state=restarted
     when: ansible_os_family != "RedHat"
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
