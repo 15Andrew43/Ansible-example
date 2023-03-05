@@ -395,7 +395,7 @@ linux2 ansible_host=172.31.27.129
 linux3 ansible_host=172.31.27.65
 ```
 
-### playbook3.yml
+### playbook.yml
 ```
 ---
 - name: Install Apache and upload my Web page
@@ -449,9 +449,121 @@ linux3 ansible_host=172.31.27.65
 
 
 
+## Example-7 (Loop, with_items, until, with_fileglob)
+
+### Structure of directories
+```
+.
+├── ansible.cfg
+├── group_vars
+│   └── ALL_LINUX
+└── hosts.txt
+├── MyWebSite
+│   └── index.html
+├── MyWebSite2
+│   ├── bahamas.png
+│   ├── bulgaria.png
+│   ├── jordan.png
+│   ├── newzeland.png
+│   └── index.html
+├── loop.yml
+└── playbook.yml
+```
 
 
+### loop.yml
+```
+---
+- name: Loops Playbook
+  hosts:linux3
+  become: yes
 
+  tasks:
+  - name: Say hello to ALL
+    debug: msg="Hello {{ item }}"
+    with_items: # or loop
+        - "Vasya"
+        - "Petya"
+        - "Masha"
+        - "Olya"
+
+  - name: Loop Until example
+    shell: echo -n Q >> myfile.txt && cat myfile.txt
+    register: output
+    delay: 2 # in seconds
+    retries: 10
+    until: output.stdout.find("QQQQ") == false
+
+  - name: Print final output
+    debug:
+      var: output.stdout
+
+  - name: Install many packages
+    yum: name={{ item }} state=installed
+    with_items:
+        - python
+        - tree
+        -mysql-client
+```
+- ansible-playbook loop.yml
+
+
+### playbook.yml
+```
+---
+- name: Install Apache and upload my Web page
+  hosts: all
+  become: yes
+
+  vars:
+    source_folder: ./MyWebSite2
+    destin_folder: /var/www/html
+
+  tasks:
+  - name: Check and Print LINUX Version
+    debug: var=ansible_os_family
+
+  - block: # ====== block for RedHat ==========
+
+      - name: Install Apache WebServer for RedHat
+        yum: name=httpd state=latest                     # <-------------
+
+      - name: Start Apache and enable it on the every boot for RedHat
+        service: name=httpd state=started enabled=yes    # <-------------
+        
+    when: ansible_os_family == "RedHat"
+
+  - block: # ====== block for ubuntu ===========
+
+      - name: Install Apache WebServer for Debian
+        apt: name=apache2 state=latest                   # <-------------
+
+      - name: Start Apache and enable it on the every boot for Debian
+        service: name=apache2 state=started enabled=yes  # <-------------
+        
+    when: ansible_os_family != "RedHat"
+
+  - name: copy my HomePage to servers
+    copy: src={{ source_folder }}/{{ item }} dest = {{ destin_folder }} mode=0555
+    with_fileglob: "{{ source_folder }}/*.*"
+#    loop:
+#        - "bahamas.png"
+#        - "bulgaria.png"
+#        - "jordan.png"
+#        - "newzeland.png"
+#        - "index.html"
+    notify: 
+        - Restart Apache RedHat
+        - Restart Apache Debian
+
+  handlers:
+  - name: Restart Apache RedHat
+    service: name=httpd state=restarted
+    when: ansible_os_family == "RedHat"
+  - name: Restart Apache Debian
+    service: name=apache2 state=restarted
+    when: ansible_os_family != "RedHat"
+```
 
 
 
