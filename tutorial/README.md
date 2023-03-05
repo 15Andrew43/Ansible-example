@@ -375,4 +375,93 @@ linux3 ansible_host=172.31.27.65       owner=Nikolay
 
 ## Example-6 (Block-When)
 
+### Structure of directories
+```
+.
+├── ansible.cfg
+├── group_vars
+│   └── ALL_LINUX
+└── hosts.txt
+├── MyWebSite
+│   └── index.html
+└── playbook.yml
+```
+
+### hosts.txt
+```
+[ALL_LINUX]
+linux1 ansible_host=172.31.27.113
+linux2 ansible_host=172.31.27.129
+linux3 ansible_host=172.31.27.65
+```
+
+### playbook3.yml
+```
+---
+- name: Install Apache and upload my Web page
+  hosts: all
+  become: yes
+
+  vars:
+    source_file: ./MyWebSite/index.html
+    destin_file: /var/www/html
+
+  tasks:
+  - name: Check and Print LINUX Version
+    debug: var=ansible_os_family
+
+  - block: # ====== block for RedHat ==========
+
+      - name: Install Apache WebServer for RedHat
+        yum: name=httpd state=latest                     # <-------------
+
+      - name: copy my HomePage to servers
+        copy: src={{ source_file }} dest = {{ destin_file }} mode=0555
+        notify: Restart Apache RedHat
+
+      - name: Start Apache and enable it on the every boot for RedHat
+        service: name=httpd state=started enabled=yes    # <-------------
+        
+    when: ansible_os_family == "RedHat"
+
+  - block: # ====== block for ubuntu ===========
+
+      - name: Install Apache WebServer for Debian
+        apt: name=apache2 state=latest                   # <-------------
+
+      - name: copy my HomePage to servers
+        copy: src={{ source_file }} dest = {{ destin_file }} mode=0555
+        notify: Restart Apache Debian
+
+      - name: Start Apache and enable it on the every boot for Debian
+        service: name=apache2 state=started enabled=yes  # <-------------
+        
+    when: ansible_os_family != "RedHat"
+
+  handlers:
+  - name: Restart Apache RedHat
+    service: name=httpd state=restarted
+  - name: Restart Apache Debian
+    service: name=apache2 state=restarted
+```
+- ansible-playbook playbook.yml
+- ansible all -m setup
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
