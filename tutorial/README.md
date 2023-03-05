@@ -103,8 +103,10 @@ inventory           = ./hosts.txt
 
 
  - ansible all -m ping
- - ansible-inventory --list  = для прсмотра какие переменные в инвентори и описание серверов
- - ansible-inventory --graph = для прсмотра какие переменные в инвентори и описание серверов
+ - ansible-inventory --list  
+= для прсмотра какие переменные в инвентори и описание серверов
+ - ansible-inventory --graph  
+= для прсмотра какие переменные в инвентори и описание серверов
 
 
 
@@ -133,11 +135,11 @@ ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
 ```
 
  - ansible all -m ping
- - ansible staging_servers -m setup 
+ - ansible staging_servers -m setup   
 = посмотреть всю информацию о серверах (айпи, операционка, архитектрура, время, сетевые карты, dns-name, kernel-version). Все эти переменные можно использовать
- - amsible all -m shell -a "uptime > a.txt && pipi sinstall tree && echo pep >> bruh.txt"
+ - amsible all -m shell -a "uptime > a.txt && pipi sinstall tree && echo pep >> bruh.txt"  
 = выполнить шелл команду
- - ansible all -m command -a "...."
+ - ansible all -m command -a "...."  
 = аналогично шелл, но с ограничениями (не работают пайпы и тд)
 
 
@@ -145,11 +147,11 @@ ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
 ```
 Privet
 ```
- - ansible all m copy -a "arc=privet.txt dest=/home mode=777" -b
+ - ansible all m copy -a "arc=privet.txt dest=/home mode=777" -b  
 = скопировать файл на сервера
- - ansible prod_servers -m file -a "path=/home/privet.txt state=absent" -b
+ - ansible prod_servers -m file -a "path=/home/privet.txt state=absent" -b  
 = создать/удалить файлы и директории
- - ansible all -m get_url -a "url=https://aaaaaa.com/bbb dest=/home" -b
+ - ansible all -m get_url -a "url=https://aaaaaa.com/bbb dest=/home" -b  
 = скачать из интернета
 
 
