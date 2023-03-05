@@ -194,3 +194,167 @@ destin_folder: /var/www/html
 
 
 
+## Example-9 (extra-vars)
+
+### hosts.txt
+```
+[PROD]
+linux1 ansible_host=172.31.3.113  owner=Petya
+
+[STAGING]
+linux3 ansible_host=172.31.19.251  owner=Vasya
+
+[ALL_LINUX:children]
+PROD
+STAGING
+```
+
+### playbook.yml
+```
+---
+- name: Install Apache and upload my Web page
+  hosts: "{{ MYHOSTS }}"
+  become: yes
+
+  roles:
+    - { role: deploy_apache_web, when: ansible_system == "Linux" }
+```
+
+ - ansible-playbook playbook.yml --extra-var "MYHOSTS=STAGING owner=Denys"  
+вместо --extra-var можно писать --extra-vars, -e  
+переменные переданные таким путем самые приоритетные
+
+
+
+
+## Example-10 (include, imports)
+
+
+### playbook.yml
+```
+---
+- name: My super Playbook
+  hosts: all
+  become: yes
+
+  vars:
+    mytext: "Privet from Andrey"
+
+  tasks:
+  - name: Ping test
+    ping:
+
+  - name: Create Folders
+    include: create_folders.yml mytext="Hello world"
+
+  - import: create_files.yml
+```
+
+### create_folders.yml
+```
+---
+- name: Create folder1
+  file:
+    path: /home/secret/folder1
+    state: directory
+    mode: 0755
+
+- name: Create folder2
+  file:
+    path: /home/secret/folder2
+    state: directory
+    mode: 0755
+```
+
+### create_files.yml
+```
+---
+- name: Create file1
+  copy:
+    dest: /home/secret/file1.txt
+    content: |
+      TEXT Line1, in file1
+      TEXT Line2, in file1
+      TEXT Line3, in {{ mytext }}
+
+- name: Create file2
+  copy:
+    dest: /home/secret/file2.txt
+    content: |
+      TEXT Line1, in file2
+      TEXT Line2, in file2
+      TEXT Line3, in {{ mytext }}
+```
+
+
+
+
+## Example-11 (delegate_to)
+
+
+### playbook.yml
+```
+---
+- name: My super Playbook
+  hosts: all
+  become: yes
+
+  vars:
+    mytext: "Vitayu tebe, miy Druzshe!"
+
+  tasks:
+  - name: Ping test
+    ping:
+
+  - name: Unregister Server from Load Balancer
+    shell: echo this server {{ inventory_hostname }} was deregistered from out Load Balancer, node name is {{ ansible_nodename }} >> /home/log.txt
+    delegate_to: 127.0.0.1
+
+  - name: Update my Database
+    shell: echo "UPDATING Database..."
+    run_once: true  # эта таска выполнится один ран на одном сервере
+
+  - name: Create file1
+    copy:
+      dest: /home/file1.txt
+      content: |
+        This is file1
+        In ENGLISH Hello World
+        On UKRAINIAN {{ mytext }}
+    delegate_to: linux3
+
+  - name: Create file2
+    copy:
+      dest: /home/file2.txt
+      content: |
+        This is file2
+        In ENGLISH Hello World
+        On UKRAINIAN {{ mytext }}
+
+  - name: Reboot my servers
+    shell: sleep 3 && reboot now
+    async: 1
+    poll: 0   # не держать сессию ssh
+
+  - name: Wait till me server will come up online
+    wait_for:
+      host: "{{ inventory_hostname }}"
+      state: started
+      delay: 5
+      timeout: 40
+    delegate_to: 127.0.0.1
+
+  - name: Register Server to Load Balancer
+    shell: echo this server {{ inventory_hostname }} REGISTERED to Load Balancer, node name is {{ ansible_nodename }} >> /home/log.txt
+    delegate_to: 127.0.0.1
+```
+
+delegate_to перенаправит выполнение на другой сервер.  
+
+Рассмотрим case:  
+ - Все серверы в load Balancere зарегестрированы
+ - перед редактированием данных сервера (обновлением конфи и тд) нужно его отключить от балансироваки (чтобы на него не ходил трафик)  
+Данный пример эмулирует эту ситуацию. На серверах перед выполнением происходит отключение их от балансировки, затем накатываются обновления, затем перегружается сервер, а затем опять включается в балансировку нагрузки.
+
+
+
