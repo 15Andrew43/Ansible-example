@@ -309,5 +309,70 @@ location    : "Huston, TX"
 
 
 
+## Example-5 (debug, setfactor, register)
+
+### Structure of directories
+```
+.
+├── ansible.cfg
+├── group_vars
+│   └── PROD_SERVERS_WEB
+└── hosts.txt
+└── playbook.yml
+```
+
+### hosts.txt
+```
+[PROD_SERVERS_WEB]
+linux1 ansible_host=172.31.27.113       owner=Vasya
+linux2 ansible_host=172.31.27.129       owner=Petya
+linux3 ansible_host=172.31.27.65       owner=Nikolay
+```
+
+### playbook.yml
+```
+---
+- name: My super puper Playbook for variables lesson
+  hosts: all
+  become: yes
+
+  vars:
+    message1: Privet
+    message2: World
+    secret: DJFVBJKDFVBJSDLKANDVLK;ANFVJK
+
+  tasks:
+  - name: Print secret variables
+    debug:
+      var: secret
+
+  - debug:
+      msg: "secret word: {{ secret }}"
+
+  - debug:
+      msg: "this server owner is -->{{ owner }}<--"
+
+  - set_fact: full_message="{{ Privet }} {{ World }} from {{owner}}"
+
+  - debug:
+      var: full_message
+
+  - debug:
+      var: ansible_distribution
+
+  - shell: uptime
+    register: results  # сохранить вывод output в переменную results
+
+  - debug:
+      var: results
+
+  - debug:
+      var: results.stdout
+```
+- ansible-playbook playbook.yml
+- ansible all -m setup
+
+
+## Example-6 (Block-When)
 
 
