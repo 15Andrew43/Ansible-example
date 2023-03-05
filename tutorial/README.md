@@ -11,8 +11,7 @@
 
 ## example-1
 
-# hosts.txt (inventory):
-
+### hosts.txt (inventory):
 ```
 10.50.1.1
 webserver.google.com
@@ -93,8 +92,7 @@ all             = группа хостов (например prod_servers)
 
 
 
-# ansible.cfg
-
+### ansible.cfg
 ```
 [defaults]
 host_key_checking   = false
@@ -114,13 +112,13 @@ inventory           = ./hosts.txt
 
 
 
-# ansible.cfg
+### ansible.cfg
 ```
 [defaults]
 host_key_checking   = false
 inventory           = ./hosts.txt
 ```
-# hosts.txt (inventory):
+### hosts.txt (inventory):
 ```
 [staging_servers]
 linuxX ansible_host=172.31.8.69 ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
@@ -143,7 +141,7 @@ ansible_user=ec2-user ansible_ssh_private_key_file=<path to private key>
 аналогично шелл, но с ограничениями (не работают пайпы и тд)
 
 
-# hello.txt
+### hello.txt
 ```
 Privet
 ```
